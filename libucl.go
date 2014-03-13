@@ -1,4 +1,4 @@
-package main
+package libucl
 
 // #cgo CFLAGS: -Ivendor/libucl/include
 // #cgo LDFLAGS: -Lvendor/libucl/.obj -lucl

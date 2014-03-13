@@ -25,17 +25,10 @@ git clone https://github.com/vstakhov/libucl.git .
 case $OS in
     MINGW32*)
         mingw32-make -f Makefile.w32
-        ;;
-    CYGWIN*)
-        make -f Makefile.w32
-        ;;
-    Darwin*)
-        cmake cmake/
-        make
-        mkdir -p .obj
-        mv libucl.a .obj/
+        cp .obj/libucl.dll .
         ;;
     *)
-        make -f Makefile.unix
+        cmake cmake/
+        make
         ;;
 esac
