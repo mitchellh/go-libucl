@@ -12,19 +12,6 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 # Determine the OS that we're on, which is used in some later checks.
 OS=$(uname -s 2>/dev/null)
 
-# Determine the Make information for our OS.
-MAKE="make"
-MAKEFILE="Makefile.unix"
-case $OS in
-    MINGW32*)
-        MAKEFILE="Makefile.w32"
-        MAKE="mingw32-make"
-        ;;
-    CYGWIN*)
-        MAKEFILE="Makefile.w32"
-        ;;
-esac
-
 # cd into the root directory
 cd $DIR/..
 
@@ -33,4 +20,22 @@ rm -rf vendor/libucl
 mkdir -p vendor/libucl
 pushd vendor/libucl
 git clone https://github.com/vstakhov/libucl.git .
-${MAKE} -f ${MAKEFILE}
+
+# Determine how to build
+case $OS in
+    MINGW32*)
+        mingw32-make -f Makefile.w32
+        ;;
+    CYGWIN*)
+        make -f Makefile.w32
+        ;;
+    Darwin*)
+        cmake cmake/
+        make
+        mkdir -p .obj
+        mv libucl.a .obj/
+        ;;
+    *)
+        make -f Makefile.unix
+        ;;
+esac
