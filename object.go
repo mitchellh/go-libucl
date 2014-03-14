@@ -14,6 +14,7 @@ type ObjectIter struct {
 	iter   C.ucl_object_iter_t
 }
 
+// ObjectType is an enum of the type that an Object represents.
 type ObjectType int
 
 const (
