@@ -47,6 +47,7 @@ func TestObjectIterate(t *testing.T) {
 
 	result := make([]string, 0, 10)
 	for elem := iter.Next(); elem != nil; elem = iter.Next() {
+		defer elem.Close()
 		result = append(result, elem.Key())
 		result = append(result, elem.ToString())
 	}
