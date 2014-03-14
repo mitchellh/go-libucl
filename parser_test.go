@@ -1,6 +1,7 @@
 package libucl
 
 import (
+	"io/ioutil"
 	"testing"
 )
 
@@ -18,6 +19,50 @@ func TestParser(t *testing.T) {
 	defer p.Close()
 
 	if err := p.AddChunk(`foo = bar;`); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	obj := p.Object()
+	if obj == nil {
+		t.Fatal("obj should not be nil")
+	}
+	defer obj.Close()
+
+	if obj.Type() != ObjectTypeObject {
+		t.Fatalf("bad: %#v", obj.Type())
+	}
+
+	value := obj.Get("foo")
+	if value == nil {
+		t.Fatal("should have value")
+	}
+	defer value.Close()
+
+	if value.Type() != ObjectTypeString {
+		t.Fatalf("bad: %#v", obj.Type())
+	}
+
+	if value.Key() != "foo" {
+		t.Fatalf("bad: %#v", value.Key())
+	}
+
+	if value.ToString() != "bar" {
+		t.Fatalf("bad: %#v", value.ToString())
+	}
+}
+
+func TestParserAddFile(t *testing.T) {
+	tf, err := ioutil.TempFile("", "libucl")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	tf.Write([]byte("foo = bar;"))
+	tf.Close()
+
+	p := NewParser(0)
+	defer p.Close()
+
+	if err := p.AddFile(tf.Name()); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 

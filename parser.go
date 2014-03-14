@@ -54,6 +54,16 @@ func (p *Parser) AddChunk(data string) error {
 	return nil
 }
 
+// AddFile adds a file to parse.
+func (p *Parser) AddFile(path string) error {
+	result := C.ucl_parser_add_file(p.parser, C.CString(path))
+	if !result {
+		errstr := C.ucl_parser_get_error(p.parser)
+		return errors.New(C.GoString(errstr))
+	}
+	return nil
+}
+
 // Closes the parser. Once it is closed it can no longer be used. You
 // should always close the parser once you're done with it to clean up
 // any unused memory.
