@@ -4,6 +4,15 @@ import (
 	"testing"
 )
 
+func testParseString(t *testing.T, data string) *Object {
+	obj, err := ParseString(data)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	return obj
+}
+
 func TestParser(t *testing.T) {
 	p := NewParser(0)
 	defer p.Close()

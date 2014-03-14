@@ -8,6 +8,12 @@ type Object struct {
 	object *C.ucl_object_t
 }
 
+// ObjectIter is an interator for objects.
+type ObjectIter struct {
+	object *C.ucl_object_t
+	iter   C.ucl_object_iter_t
+}
+
 type ObjectType int
 
 const (
@@ -37,6 +43,21 @@ func (o *Object) Get(key string) *Object {
 	return &Object{object: obj}
 }
 
+// Iterate over the objects in this object.
+//
+// The iterator must be closed when it is finished.
+//
+// The iterator does not need to be fully consumed.
+func (o *Object) Iterate() *ObjectIter {
+	// Increase the ref count
+	C.ucl_object_ref(o.object)
+
+	return &ObjectIter{
+		object: o.object,
+		iter:   nil,
+	}
+}
+
 // Returns the key of this value/object as a string, or the empty
 // string if the object doesn't have a key.
 func (o *Object) Key() string {
@@ -63,4 +84,17 @@ func (o *Object) Type() ObjectType {
 
 func (o *Object) ToString() string {
 	return C.GoString(C.ucl_object_tostring(o.object))
+}
+
+func (o *ObjectIter) Close() {
+	C.ucl_object_unref(o.object)
+}
+
+func (o *ObjectIter) Next() *Object {
+	obj := C.ucl_iterate_object(o.object, &o.iter, true)
+	if obj == nil {
+		return nil
+	}
+
+	return &Object{object: obj}
 }
