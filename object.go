@@ -83,6 +83,10 @@ func (o *Object) Type() ObjectType {
 // Conversion Functions
 //------------------------------------------------------------------------
 
+func (o *Object) ToInt() int64 {
+	return int64(C.ucl_object_toint(o.object))
+}
+
 func (o *Object) ToString() string {
 	return C.GoString(C.ucl_object_tostring(o.object))
 }
