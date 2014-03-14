@@ -6,6 +6,7 @@ import "C"
 // Object represents a single object within a configuration.
 type Object struct {
 	object *C.ucl_object_t
+	weak   bool
 }
 
 // ObjectIter is an interator for objects.
@@ -31,7 +32,9 @@ const (
 // Free the memory associated with the object. This must be called when
 // you're done using it.
 func (o *Object) Close() {
-	C.ucl_object_unref(o.object)
+	if !o.weak {
+		C.ucl_object_unref(o.object)
+	}
 }
 
 func (o *Object) Get(key string) *Object {
@@ -96,5 +99,5 @@ func (o *ObjectIter) Next() *Object {
 		return nil
 	}
 
-	return &Object{object: obj}
+	return &Object{object: obj, weak: true}
 }

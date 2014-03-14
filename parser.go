@@ -48,7 +48,7 @@ func (p *Parser) AddChunk(data string) error {
 	cstr := C.char_to_uchar(C.CString(data))
 	result := C.ucl_parser_add_chunk(p.parser, cstr, C.size_t(len(data)))
 	if !result {
-		errstr := C.ucl_parser_get_error(p.parser);
+		errstr := C.ucl_parser_get_error(p.parser)
 		return errors.New(C.GoString(errstr))
 	}
 	return nil
