@@ -26,6 +26,9 @@ case $OS in
     MINGW32*)
         mingw32-make -f Makefile.w32
         cp .obj/libucl.dll .
+
+        # Windows also needs it handy if we're testing
+        cp .obj/libucl.dll ${DIR}/..
         ;;
     *)
         cmake cmake/
