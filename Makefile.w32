@@ -1,0 +1,10 @@
+all: vendor/libucl/libucl.dll
+	go build
+
+test: vendor/libucl/libucl.dll
+	go test
+
+vendor/libucl/libucl.dll:
+	./scripts/build_libucl.sh
+
+.PHONY: all test
