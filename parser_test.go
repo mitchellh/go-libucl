@@ -18,7 +18,7 @@ func TestParser(t *testing.T) {
 	p := NewParser(0)
 	defer p.Close()
 
-	if err := p.AddChunk(`foo = bar;`); err != nil {
+	if err := p.AddString(`foo = bar;`); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 

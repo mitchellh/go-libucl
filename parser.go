@@ -30,7 +30,7 @@ type Parser struct {
 func ParseString(data string) (*Object, error) {
 	p := NewParser(0)
 	defer p.Close()
-	if err := p.AddChunk(data); err != nil {
+	if err := p.AddString(data); err != nil {
 		return nil, err
 	}
 
@@ -44,10 +44,9 @@ func NewParser(flags ParserFlag) *Parser {
 	}
 }
 
-// AddChunk adds a string chunk of data to parse.
-func (p *Parser) AddChunk(data string) error {
-	cstr := C.char_to_uchar(C.CString(data))
-	result := C.ucl_parser_add_chunk(p.parser, cstr, C.size_t(len(data)))
+// AddString adds a string data to parse.
+func (p *Parser) AddString(data string) error {
+	result := C.ucl_parser_add_string(p.parser, C.CString(data), C.size_t(len(data)))
 	if !result {
 		errstr := C.ucl_parser_get_error(p.parser)
 		return errors.New(C.GoString(errstr))
