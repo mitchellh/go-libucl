@@ -5,7 +5,6 @@ import (
 )
 
 // #include <ucl.h>
-// #include "util.h"
 import "C"
 
 // ParserFlag are flags that can be used to initialize a parser.
