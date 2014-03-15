@@ -17,7 +17,8 @@ type ParserFlag int
 
 const (
 	ParserKeyLowercase ParserFlag = C.UCL_PARSER_KEY_LOWERCASE
-	ParserKeyZeroCopy             = C.UCL_PARSER_ZEROCOPY
+	ParserZeroCopy                = C.UCL_PARSER_ZEROCOPY
+	ParserNoTime                  = C.UCL_PARSER_NO_TIME
 )
 
 // Parser is responsible for parsing libucl data.
