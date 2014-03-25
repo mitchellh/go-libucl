@@ -18,13 +18,17 @@ cd $DIR/..
 # Create the vendor directory so we can build libucl
 rm -rf vendor/libucl
 mkdir -p vendor/libucl
-pushd vendor/libucl
+cd vendor/libucl
 git clone https://github.com/vstakhov/libucl.git .
 
 # Determine how to build
 case $OS in
     MINGW32*)
+        # TEMPORARY UNTIL #17 is merged
+        export LDFLAGS="-lregex $LDFLAGS"
+
         mingw32-make -f Makefile.w32
+
         cp .obj/libucl.dll .
 
         # Windows also needs it handy if we're testing
