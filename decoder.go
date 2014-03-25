@@ -46,7 +46,11 @@ func decodeIntoMap(name string, o *Object, result reflect.Value) error {
 	}
 
 	// Make a map to store our result
-	resultMap := reflect.MakeMap(reflect.MapOf(resultKeyType, resultElemType))
+	resultMap := result
+	if result.IsNil() {
+		resultMap = reflect.MakeMap(
+			reflect.MapOf(resultKeyType, resultElemType))
+	}
 
 	iter := o.Iterate(true)
 	defer iter.Close()
