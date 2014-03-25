@@ -20,3 +20,9 @@ $ go get github.com/mitchellh/go-libucl
 ```
 
 Documentation is available on GoDoc: http://godoc.org/github.com/mitchellh/go-libucl
+
+### Compiling Libucl
+
+Libucl should compile easily and cleanly on POSIX systems.
+
+On Windows, msys should be used. msys-regex needs to be compiled.

@@ -1,5 +1,5 @@
 all: vendor/libucl/libucl.a
-	go build
+	go test
 
 clean:
 	rm -rf vendor/
