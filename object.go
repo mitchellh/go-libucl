@@ -30,6 +30,8 @@ const (
 	ObjectTypeNull
 )
 
+// Emitter is a type of built-in emitter that can be used to convert
+// an object to another config format.
 type Emitter int
 
 const (
