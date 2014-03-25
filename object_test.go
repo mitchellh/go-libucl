@@ -53,11 +53,29 @@ func TestObjectLen_array(t *testing.T) {
 	}
 }
 
+func TestObjectLen_object(t *testing.T) {
+	obj := testParseString(t, `bundle "foo" {}; bundle "bar" {};`)
+	defer obj.Close()
+
+	v := obj.Get("bundle")
+	defer v.Close()
+	if v == nil {
+		t.Fatal("should find")
+	}
+
+	if v.Type() != ObjectTypeObject {
+		t.Fatalf("bad: %#v", v.Type())
+	}
+	if v.Len() != 2 {
+		t.Fatalf("bad: %#v", v.Len())
+	}
+}
+
 func TestObjectIterate(t *testing.T) {
 	obj := testParseString(t, "foo = bar; bar = baz;")
 	defer obj.Close()
 
-	iter := obj.Iterate()
+	iter := obj.Iterate(true)
 	defer iter.Close()
 
 	result := make([]string, 0, 10)
@@ -82,7 +100,7 @@ func TestObjectIterate_array(t *testing.T) {
 		t.Fatal("should have object")
 	}
 
-	iter := obj.Iterate()
+	iter := obj.Iterate(true)
 	defer iter.Close()
 
 	result := make([]string, 0, 10)

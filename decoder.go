@@ -46,7 +46,7 @@ func decodeIntoMap(name string, o *Object, result reflect.Value) error {
 	// Make a map to store our result
 	resultMap := reflect.MakeMap(reflect.MapOf(resultKeyType, resultElemType))
 
-	iter := o.Iterate()
+	iter := o.Iterate(true)
 	defer iter.Close()
 	for elem := iter.Next(); elem != nil; elem = iter.Next() {
 		fieldName := fmt.Sprintf("%s[%s]", name, elem.Key())
@@ -83,7 +83,7 @@ func decodeIntoSlice(name string, o *Object, result reflect.Value) error {
 	resultSlice := reflect.MakeSlice(resultSliceType, int(o.Len()), int(o.Len()))
 
 	i := 0
-	iter := o.Iterate()
+	iter := o.Iterate(true)
 	defer iter.Close()
 	for elem := iter.Next(); elem != nil; elem = iter.Next() {
 		val := resultSlice.Index(i)
@@ -186,7 +186,7 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 		if elem == nil {
 			// Do a slower search by iterating over each key and
 			// doing case-insensitive search.
-			iter := o.Iterate()
+			iter := o.Iterate(true)
 			for elem = iter.Next(); elem != nil; elem = iter.Next() {
 				if strings.EqualFold(elem.Key(), fieldName) {
 					break
