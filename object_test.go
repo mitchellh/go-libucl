@@ -5,6 +5,21 @@ import (
 	"testing"
 )
 
+func TestObjectEmit(t *testing.T) {
+	obj := testParseString(t, "foo = bar; bar = baz;")
+	defer obj.Close()
+
+	result, err := obj.Emit(EmitJSON)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := "{\n    \"foo\": \"bar\",\n    \"bar\": \"baz\"\n}"
+	if result != expected {
+		t.Fatalf("bad: %#v", result)
+	}
+}
+
 func TestObjectGet(t *testing.T) {
 	obj := testParseString(t, "foo = bar; bar = baz;")
 	defer obj.Close()

@@ -1,6 +1,7 @@
 package libucl
 
 // #include <ucl.h>
+// #include "util.h"
 import "C"
 
 // Object represents a single object within a configuration.
@@ -29,10 +30,29 @@ const (
 	ObjectTypeNull
 )
 
+type Emitter int
+
+const (
+	EmitJSON Emitter = iota
+	EmitJSONCompact
+	EmitConfig
+	EmitYAML
+)
+
 // Free the memory associated with the object. This must be called when
 // you're done using it.
 func (o *Object) Close() {
 	C.ucl_object_unref(o.object)
+}
+
+// Emit converts this object to another format and returns it.
+func (o *Object) Emit(t Emitter) (string, error) {
+	result := C.ucl_object_emit(o.object, uint32(t))
+	if result == nil {
+		return "", nil
+	}
+
+	return C.GoString(C._go_uchar_to_char(result)), nil
 }
 
 func (o *Object) Get(key string) *Object {
