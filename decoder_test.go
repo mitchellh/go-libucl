@@ -35,6 +35,27 @@ func TestObjectDecode_mapNonObject(t *testing.T) {
 	}
 }
 
+func TestObjectDecode_nestedStruct(t *testing.T) {
+	type Nested struct {
+		Foo string
+	}
+
+	var result struct {
+		Value Nested
+	}
+
+	obj := testParseString(t, `value { foo = "bar"; }`)
+	defer obj.Close()
+
+	if err := obj.Decode(&result); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result.Value.Foo != "bar" {
+		t.Fatalf("bad: %#v", result.Value.Foo)
+	}
+}
+
 func TestObjectDecode_slice(t *testing.T) {
 	obj := testParseString(t, "foo = [foo, bar, 12];")
 	defer obj.Close()
@@ -72,6 +93,33 @@ func TestObjectDecode_struct(t *testing.T) {
 	}
 	if result.Bar != "baz" {
 		t.Fatalf("bad: %#v", result.Bar)
+	}
+}
+
+func TestObjectDecode_structArray(t *testing.T) {
+	type Nested struct {
+		Foo string
+	}
+
+	var result struct {
+		Value []*Nested
+	}
+
+	obj := testParseString(t, `value { foo = "bar"; }; value { foo = "baz"; }`)
+	defer obj.Close()
+
+	if err := obj.Decode(&result); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(result.Value) != 2 {
+		t.Fatalf("bad: %#v", result.Value)
+	}
+	if result.Value[0].Foo != "bar" {
+		t.Fatalf("bad: %#v", result.Value[0].Foo)
+	}
+	if result.Value[1].Foo != "baz" {
+		t.Fatalf("bad: %#v", result.Value[1].Foo)
 	}
 }
 

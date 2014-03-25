@@ -18,6 +18,8 @@ func decode(name string, o *Object, result reflect.Value) error {
 	switch result.Kind() {
 	case reflect.Map:
 		return decodeIntoMap(name, o, result)
+	case reflect.Ptr:
+		return decodeIntoPtr(name, o, result)
 	case reflect.Slice:
 		return decodeIntoSlice(name, o, result)
 	case reflect.String:
@@ -71,8 +73,28 @@ func decodeIntoMap(name string, o *Object, result reflect.Value) error {
 	return nil
 }
 
+func decodeIntoPtr(name string, o *Object, result reflect.Value) error {
+	// Create an element of the concrete (non pointer) type and decode
+	// into that. Then set the value of the pointer to this type.
+	resultType := result.Type()
+	resultElemType := resultType.Elem()
+	val := reflect.New(resultElemType)
+	if err := decode(name, o, reflect.Indirect(val)); err != nil {
+		return err
+	}
+
+	result.Set(val)
+	return nil
+}
+
 func decodeIntoSlice(name string, o *Object, result reflect.Value) error {
-	if o.Type() != ObjectTypeArray {
+	expand := true
+	switch o.Type() {
+	case ObjectTypeArray:
+		// Okay.
+	case ObjectTypeObject:
+		expand = false
+	default:
 		return fmt.Errorf("%s: is not type array", name)
 	}
 
@@ -83,7 +105,7 @@ func decodeIntoSlice(name string, o *Object, result reflect.Value) error {
 	resultSlice := reflect.MakeSlice(resultSliceType, int(o.Len()), int(o.Len()))
 
 	i := 0
-	iter := o.Iterate(true)
+	iter := o.Iterate(expand)
 	defer iter.Close()
 	for elem := iter.Next(); elem != nil; elem = iter.Next() {
 		val := resultSlice.Index(i)
