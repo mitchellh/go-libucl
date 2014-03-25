@@ -1,6 +1,9 @@
 package libucl
 
+import "unsafe"
+
 // #include <ucl.h>
+// #include <stdlib.h>
 // #include "util.h"
 import "C"
 
@@ -58,7 +61,10 @@ func (o *Object) Emit(t Emitter) (string, error) {
 }
 
 func (o *Object) Get(key string) *Object {
-	obj := C.ucl_object_find_keyl(o.object, C.CString(key), C.size_t(len(key)))
+	ckey := C.CString(key)
+	defer C.free(unsafe.Pointer(ckey))
+
+	obj := C.ucl_object_find_keyl(o.object, ckey, C.size_t(len(key)))
 	if obj == nil {
 		return nil
 	}

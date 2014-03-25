@@ -2,9 +2,11 @@ package libucl
 
 import (
 	"errors"
+	"unsafe"
 )
 
 // #include <ucl.h>
+// #include <stdlib.h>
 import "C"
 
 // ParserFlag are flags that can be used to initialize a parser.
@@ -45,7 +47,10 @@ func NewParser(flags ParserFlag) *Parser {
 
 // AddString adds a string data to parse.
 func (p *Parser) AddString(data string) error {
-	result := C.ucl_parser_add_string(p.parser, C.CString(data), C.size_t(len(data)))
+	cs := C.CString(data)
+	defer C.free(unsafe.Pointer(cs))
+
+	result := C.ucl_parser_add_string(p.parser, cs, C.size_t(len(data)))
 	if !result {
 		errstr := C.ucl_parser_get_error(p.parser)
 		return errors.New(C.GoString(errstr))
@@ -55,7 +60,10 @@ func (p *Parser) AddString(data string) error {
 
 // AddFile adds a file to parse.
 func (p *Parser) AddFile(path string) error {
-	result := C.ucl_parser_add_file(p.parser, C.CString(path))
+	cs := C.CString(path)
+	defer C.free(unsafe.Pointer(cs))
+
+	result := C.ucl_parser_add_file(p.parser, cs)
 	if !result {
 		errstr := C.ucl_parser_get_error(p.parser)
 		return errors.New(C.GoString(errstr))
