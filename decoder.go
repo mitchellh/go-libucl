@@ -230,7 +230,25 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 			fieldName = fmt.Sprintf("%s.%s", name, fieldName)
 		}
 
-		err := decode(fieldName, elem, field)
+		var err error
+		if field.Kind() == reflect.Slice {
+			err = decode(fieldName, elem, field)
+		} else {
+			iter := elem.Iterate(false)
+			for {
+				obj := iter.Next()
+				if obj == nil {
+					break
+				}
+
+				err = decode(fieldName, obj, field)
+				obj.Close()
+				if err != nil {
+					break
+				}
+			}
+			iter.Close()
+		}
 		elem.Close()
 
 		if err != nil {
