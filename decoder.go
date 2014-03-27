@@ -52,23 +52,27 @@ func decodeIntoMap(name string, o *Object, result reflect.Value) error {
 			reflect.MapOf(resultKeyType, resultElemType))
 	}
 
-	iter := o.Iterate(true)
-	defer iter.Close()
-	for elem := iter.Next(); elem != nil; elem = iter.Next() {
-		fieldName := fmt.Sprintf("%s[%s]", name, elem.Key())
+	outerIter := o.Iterate(false)
+	defer outerIter.Close()
+	for outer := outerIter.Next(); outer != nil; outer = outerIter.Next() {
+		iter := outer.Iterate(true)
+		defer iter.Close()
+		for elem := iter.Next(); elem != nil; elem = iter.Next() {
+			fieldName := fmt.Sprintf("%s[%s]", name, elem.Key())
 
-		// The key is just the key of the object
-		key := reflect.ValueOf(elem.Key())
+			// The key is just the key of the object
+			key := reflect.ValueOf(elem.Key())
 
-		// The value we have to be decode
-		val := reflect.Indirect(reflect.New(resultElemType))
-		err := decode(fieldName, elem, val)
-		elem.Close()
-		if err != nil {
-			return err
+			// The value we have to be decode
+			val := reflect.Indirect(reflect.New(resultElemType))
+			err := decode(fieldName, elem, val)
+			elem.Close()
+			if err != nil {
+				return err
+			}
+
+			resultMap.SetMapIndex(key, val)
 		}
-
-		resultMap.SetMapIndex(key, val)
 	}
 
 	// Set the final result

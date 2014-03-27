@@ -22,6 +22,26 @@ func TestObjectDecode_map(t *testing.T) {
 	}
 }
 
+func TestObjectDecode_mapMulti(t *testing.T) {
+	obj := testParseString(t, "foo { foo = bar; }; foo { bar = baz; };")
+	defer obj.Close()
+
+	inner := obj.Get("foo")
+	defer inner.Close()
+
+	var result map[string]string
+	if err := inner.Decode(&result); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result["foo"] != "bar" {
+		t.Fatalf("bad: %#v", result["foo"])
+	}
+	if result["bar"] != "baz" {
+		t.Fatalf("bad: %#v", result["bar"])
+	}
+}
+
 func TestObjectDecode_mapNonNil(t *testing.T) {
 	obj := testParseString(t, "foo = bar; bar = 12;")
 	defer obj.Close()
