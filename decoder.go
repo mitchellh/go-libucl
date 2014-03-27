@@ -207,9 +207,14 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 		fieldName := fieldType.Name
 
 		tagValue := fieldType.Tag.Get(tagName)
-		tagValue = strings.SplitN(tagValue, ",", 2)[0]
-		if tagValue != "" {
-			fieldName = tagValue
+		tagParts := strings.SplitN(tagValue, ",", 2)
+		if len(tagParts) >= 2 && tagParts[1] == "key" {
+			field.SetString(o.Key())
+			continue
+		}
+
+		if tagParts[0] != "" {
+			fieldName = tagParts[0]
 		}
 
 		elem := o.Get(fieldName)

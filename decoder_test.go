@@ -161,6 +161,35 @@ func TestObjectDecode_struct(t *testing.T) {
 	}
 }
 
+func TestObjectDecode_mapStructNamed(t *testing.T) {
+	type Nested struct {
+		Name string `libucl:",key"`
+		Foo  string
+	}
+
+	var result struct {
+		Value map[string]Nested
+	}
+
+	obj := testParseString(t, `value "foo" { foo = "bar"; };`)
+	defer obj.Close()
+
+	if err := obj.Decode(&result); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := map[string]Nested{
+		"foo": Nested{
+			Name: "foo",
+			Foo:  "bar",
+		},
+	}
+
+	if !reflect.DeepEqual(result.Value, expected) {
+		t.Fatalf("bad: %#v", result.Value)
+	}
+}
+
 func TestObjectDecode_structArray(t *testing.T) {
 	type Nested struct {
 		Foo string
