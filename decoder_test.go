@@ -121,35 +121,6 @@ func TestObjectDecode_nestedStructRepeated(t *testing.T) {
 	}
 }
 
-func TestObjectDecode_nestedStructArray(t *testing.T) {
-	type Nested struct {
-		Foo string
-		Bar string
-	}
-
-	var result struct {
-		Value []Nested
-	}
-
-	obj := testParseString(t, `value { foo = "bar"; }; value { bar = "baz" };`)
-	defer obj.Close()
-
-	if err := obj.Decode(&result); err != nil {
-		t.Fatalf("err: %s", err)
-	}
-	if len(result.Value) != 2 {
-		t.Fatalf("bad: %#v", result.Value)
-	}
-
-	expected := []Nested{
-		{"bar", ""},
-		{"", "baz"},
-	}
-	if !reflect.DeepEqual(result.Value, expected) {
-		t.Fatalf("bad: %#v", expected)
-	}
-}
-
 func TestObjectDecode_slice(t *testing.T) {
 	obj := testParseString(t, "foo = [foo, bar, 12];")
 	defer obj.Close()
