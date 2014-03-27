@@ -47,8 +47,9 @@ const (
 
 // Free the memory associated with the object. This must be called when
 // you're done using it.
-func (o *Object) Close() {
+func (o *Object) Close() error {
 	C.ucl_object_unref(o.object)
+	return nil
 }
 
 // Emit converts this object to another format and returns it.
