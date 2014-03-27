@@ -161,6 +161,33 @@ func TestObjectDecode_struct(t *testing.T) {
 	}
 }
 
+func TestObjectDecode_structKeys(t *testing.T) {
+	type Struct struct {
+		Foo  []string
+		Bar  string
+		Baz  string
+		Keys []string `libucl:",decodedFields"`
+	}
+
+	var result Struct
+
+	obj := testParseString(t, "foo = [foo, bar, 12]; bar = baz;")
+	defer obj.Close()
+
+	if err := obj.Decode(&result); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := Struct{
+		Foo: []string{"foo", "bar", "12"},
+		Bar: "baz",
+		Keys: []string{"Foo", "Bar"},
+	}
+	if !reflect.DeepEqual(expected, result) {
+		t.Fatalf("bad: %#v", result)
+	}
+}
+
 func TestObjectDecode_mapStructNamed(t *testing.T) {
 	type Nested struct {
 		Name string `libucl:",key"`

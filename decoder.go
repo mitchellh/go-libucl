@@ -192,6 +192,8 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 		}
 	}
 
+	decodedFields := make([]string, 0, len(fields))
+	decodedFieldsVal := make([]reflect.Value, 0)
 	for fieldType, field := range fields {
 		if !field.IsValid() {
 			// This should never happen
@@ -208,9 +210,15 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 
 		tagValue := fieldType.Tag.Get(tagName)
 		tagParts := strings.SplitN(tagValue, ",", 2)
-		if len(tagParts) >= 2 && tagParts[1] == "key" {
-			field.SetString(o.Key())
-			continue
+		if len(tagParts) >= 2 {
+			switch tagParts[1] {
+			case "decodedFields":
+				decodedFieldsVal = append(decodedFieldsVal, field)
+				continue
+			case "key":
+				field.SetString(o.Key())
+				continue
+			}
 		}
 
 		if tagParts[0] != "" {
@@ -267,6 +275,12 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 		if err != nil {
 			return err
 		}
+
+		decodedFields = append(decodedFields, fieldType.Name)
+	}
+
+	for _, v := range decodedFieldsVal {
+		v.Set(reflect.ValueOf(decodedFields))
 	}
 
 	return nil
