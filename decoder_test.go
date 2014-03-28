@@ -239,6 +239,7 @@ func TestObjectDecode_mapStructObject(t *testing.T) {
 	if err := obj.Decode(&result); err != nil {
 		t.Fatalf("err: %s", err)
 	}
+	defer result.Value["foo"].Object.Close()
 
 	expected := map[string]Nested{
 		"foo": Nested{

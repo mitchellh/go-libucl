@@ -219,6 +219,10 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 				field.SetString(o.Key())
 				continue
 			case "object":
+				// Increase the ref count
+				o.Ref()
+
+				// Sete the object
 				field.Set(reflect.ValueOf(o))
 				continue
 			}

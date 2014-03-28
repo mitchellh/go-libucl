@@ -121,6 +121,13 @@ func (o *Object) Len() uint {
 	return uint(o.object.len)
 }
 
+// Increments the ref count associated with this. You have to call
+// close an additional time to free the memory.
+func (o *Object) Ref() error {
+	C.ucl_object_ref(o.object)
+	return nil
+}
+
 // Returns the type that this object represents.
 func (o *Object) Type() ObjectType {
 	return ObjectType(o.object._type)
