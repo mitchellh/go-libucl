@@ -114,6 +114,14 @@ func decodeIntoPtr(name string, o *Object, result reflect.Value) error {
 }
 
 func decodeIntoSlice(name string, o *Object, result reflect.Value) error {
+	// Create the slice
+	resultType := result.Type()
+	resultElemType := resultType.Elem()
+	resultSliceType := reflect.SliceOf(resultElemType)
+	resultSlice := reflect.MakeSlice(
+		resultSliceType, 0, int(o.Len()))
+
+	// Determine how we're doing this
 	expand := true
 	switch o.Type() {
 	case ObjectTypeArray:
@@ -121,26 +129,32 @@ func decodeIntoSlice(name string, o *Object, result reflect.Value) error {
 	case ObjectTypeObject:
 		expand = false
 	default:
-		return fmt.Errorf("%s: is not type array", name)
-	}
+		// We try to just coerce the thing into a slice. We do so by
+		// getting a single element and putting it into the slice if
+		// possible.
+		resultSingle := reflect.Indirect(reflect.New(resultElemType))
+		if err := decode(name, o, resultSingle); err != nil {
+			return err
+		}
 
-	// Create the slice
-	resultType := result.Type()
-	resultElemType := resultType.Elem()
-	resultSliceType := reflect.SliceOf(resultElemType)
-	resultSlice := reflect.MakeSlice(resultSliceType, int(o.Len()), int(o.Len()))
+		resultSlice = reflect.Append(resultSlice, resultSingle)
+		result.Set(resultSlice)
+		return nil
+	}
 
 	i := 0
 	iter := o.Iterate(expand)
 	defer iter.Close()
 	for elem := iter.Next(); elem != nil; elem = iter.Next() {
-		val := resultSlice.Index(i)
+		val := reflect.Indirect(reflect.New(resultElemType))
 		fieldName := fmt.Sprintf("%s[%d]", name, i)
 		err := decode(fieldName, elem, val)
 		elem.Close()
 		if err != nil {
 			return err
 		}
+
+		resultSlice = reflect.Append(resultSlice, val)
 
 		i++
 	}
