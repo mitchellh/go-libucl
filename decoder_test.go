@@ -200,6 +200,24 @@ func TestObjectDecode_slice(t *testing.T) {
 	}
 }
 
+func TestObjectDecode_sliceRepeatedKey(t *testing.T) {
+	obj := testParseString(t, "foo = foo; foo = bar;")
+	defer obj.Close()
+
+	obj = obj.Get("foo")
+	defer obj.Close()
+
+	var result []string
+	if err := obj.Decode(&result); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := []string{"foo", "bar"}
+	if !reflect.DeepEqual(expected, result) {
+		t.Fatalf("bad: %#v", result)
+	}
+}
+
 func TestObjectDecode_sliceSingle(t *testing.T) {
 	obj := testParseString(t, "foo = bar;")
 	defer obj.Close()

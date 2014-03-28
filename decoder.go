@@ -130,22 +130,10 @@ func decodeIntoSlice(name string, o *Object, result reflect.Value) error {
 	// Determine how we're doing this
 	expand := true
 	switch o.Type() {
-	case ObjectTypeArray:
-		// Okay.
 	case ObjectTypeObject:
 		expand = false
 	default:
-		// We try to just coerce the thing into a slice. We do so by
-		// getting a single element and putting it into the slice if
-		// possible.
-		resultSingle := reflect.Indirect(reflect.New(resultElemType))
-		if err := decode(name, o, resultSingle); err != nil {
-			return err
-		}
-
-		resultSlice = reflect.Append(resultSlice, resultSingle)
-		result.Set(resultSlice)
-		return nil
+		// Array or anything else: we expand values and take it all
 	}
 
 	i := 0
