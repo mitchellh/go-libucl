@@ -78,11 +78,17 @@ func decodeIntoMap(name string, o *Object, result reflect.Value) error {
 		for elem := iter.Next(); elem != nil; elem = iter.Next() {
 			fieldName := fmt.Sprintf("%s[%s]", name, elem.Key())
 
-			// The key is just the key of the object
 			key := reflect.ValueOf(elem.Key())
 
 			// The value we have to be decode
 			val := reflect.Indirect(reflect.New(resultElemType))
+
+			// If we have a pre-existing value in the map, use that
+			oldVal := resultMap.MapIndex(key)
+			if oldVal.IsValid() {
+				val.Set(oldVal)
+			}
+
 			err := decode(fieldName, elem, val)
 			elem.Close()
 			if err != nil {

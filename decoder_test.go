@@ -101,6 +101,41 @@ func TestObjectDecode_mapNonObject(t *testing.T) {
 	}
 }
 
+func TestObjectDecode_mapReuseVal(t *testing.T) {
+	type Struct struct {
+		Foo string
+		Bar string
+	}
+
+	type Result struct {
+		Struct map[string]Struct
+	}
+
+	obj := testParseString(t, `
+		struct "foo" { foo = "bar"; };
+		struct "foo" { bar = "baz"; };
+		`)
+	defer obj.Close()
+
+	var result Result
+	if err := obj.Decode(&result); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := Result{
+		Struct: map[string]Struct{
+			"foo": Struct{
+				Foo: "bar",
+				Bar: "baz",
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Fatalf("bad: %#v", result)
+	}
+}
+
 func TestObjectDecode_nestedStruct(t *testing.T) {
 	type Nested struct {
 		Foo string
