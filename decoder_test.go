@@ -179,8 +179,8 @@ func TestObjectDecode_structKeys(t *testing.T) {
 	}
 
 	expected := Struct{
-		Foo: []string{"foo", "bar", "12"},
-		Bar: "baz",
+		Foo:  []string{"foo", "bar", "12"},
+		Bar:  "baz",
 		Keys: []string{"Foo", "Bar"},
 	}
 	if !reflect.DeepEqual(expected, result) {
@@ -209,6 +209,41 @@ func TestObjectDecode_mapStructNamed(t *testing.T) {
 		"foo": Nested{
 			Name: "foo",
 			Foo:  "bar",
+		},
+	}
+
+	if !reflect.DeepEqual(result.Value, expected) {
+		t.Fatalf("bad: %#v", result.Value)
+	}
+}
+
+func TestObjectDecode_mapStructObject(t *testing.T) {
+	type Nested struct {
+		Foo    string
+		Object *Object `libucl:",object"`
+	}
+
+	var result struct {
+		Value map[string]Nested
+	}
+
+	obj := testParseString(t, `value "foo" { foo = "bar"; };`)
+	defer obj.Close()
+
+	valueObj := obj.Get("value")
+	defer valueObj.Close()
+
+	fooObj := valueObj.Get("foo")
+	defer fooObj.Close()
+
+	if err := obj.Decode(&result); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := map[string]Nested{
+		"foo": Nested{
+			Foo:    "bar",
+			Object: fooObj,
 		},
 	}
 
