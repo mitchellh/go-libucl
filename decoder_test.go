@@ -5,6 +5,32 @@ import (
 	"testing"
 )
 
+func TestObjectDecode_basic(t *testing.T) {
+	type Basic struct {
+		Str    string
+		Num    int
+		NumStr int
+	}
+
+	obj := testParseString(t, `str = bar; num = 7; numstr = "42";`)
+	defer obj.Close()
+
+	var result Basic
+	if err := obj.Decode(&result); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := Basic{
+		Str:    "bar",
+		Num:    7,
+		NumStr: 42,
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Fatalf("bad: %#v", result)
+	}
+}
+
 func TestObjectDecode_map(t *testing.T) {
 	obj := testParseString(t, "foo = bar; bar = 12;")
 	defer obj.Close()

@@ -16,6 +16,8 @@ func (o *Object) Decode(v interface{}) error {
 
 func decode(name string, o *Object, result reflect.Value) error {
 	switch result.Kind() {
+	case reflect.Int:
+		return decodeIntoInt(name, o, result)
 	case reflect.Map:
 		return decodeIntoMap(name, o, result)
 	case reflect.Ptr:
@@ -28,6 +30,22 @@ func decode(name string, o *Object, result reflect.Value) error {
 		return decodeIntoStruct(name, o, result)
 	default:
 		return fmt.Errorf("%s: unsupported type: %s", name, result.Kind())
+	}
+
+	return nil
+}
+
+func decodeIntoInt(name string, o *Object, result reflect.Value) error {
+	switch o.Type() {
+	case ObjectTypeString:
+		i, err := strconv.ParseInt(o.ToString(), 0, result.Type().Bits())
+		if err == nil {
+			result.SetInt(i)
+		} else {
+			return fmt.Errorf("cannot parse '%s' as int: %s", name, err)
+		}
+	default:
+		result.SetInt(o.ToInt())
 	}
 
 	return nil
