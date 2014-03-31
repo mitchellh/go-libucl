@@ -338,6 +338,10 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 			elem.Close()
 		}
 
+		if len(unusedKeys) == 0 {
+			unusedKeys = nil
+		}
+
 		for _, v := range unusedKeysVal {
 			v.Set(reflect.ValueOf(unusedKeys))
 		}
