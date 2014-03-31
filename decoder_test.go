@@ -401,3 +401,27 @@ func TestObjectDecode_structSquash(t *testing.T) {
 		t.Fatalf("bad: %#v", result.Baz)
 	}
 }
+
+func TestObjectDecode_structUnusedKeys(t *testing.T) {
+	type Struct struct {
+		Bar  string
+		Keys []string `libucl:",unusedKeys"`
+	}
+
+	var result Struct
+
+	obj := testParseString(t, "foo = [bar]; bar = baz; baz = what;")
+	defer obj.Close()
+
+	if err := obj.Decode(&result); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := Struct{
+		Bar:  "baz",
+		Keys: []string{"foo", "baz"},
+	}
+	if !reflect.DeepEqual(expected, result) {
+		t.Fatalf("bad: %#v", result)
+	}
+}

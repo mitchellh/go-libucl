@@ -218,8 +218,10 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 		}
 	}
 
+	usedKeys := make(map[string]struct{})
 	decodedFields := make([]string, 0, len(fields))
 	decodedFieldsVal := make([]reflect.Value, 0)
+	unusedKeysVal := make([]reflect.Value, 0)
 	for fieldType, field := range fields {
 		if !field.IsValid() {
 			// This should never happen
@@ -251,6 +253,9 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 				// Sete the object
 				field.Set(reflect.ValueOf(o))
 				continue
+			case "unusedKeys":
+				unusedKeysVal = append(unusedKeysVal, field)
+				continue
 			}
 		}
 
@@ -273,10 +278,13 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 			iter.Close()
 
 			if elem == nil {
-				// No key matching this field
+				// No key matching this field.
 				continue
 			}
 		}
+
+		// Track the used key
+		usedKeys[elem.Key()] = struct{}{}
 
 		// If the name is empty string, then we're at the root, and we
 		// don't dot-join the fields.
@@ -314,6 +322,25 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 
 	for _, v := range decodedFieldsVal {
 		v.Set(reflect.ValueOf(decodedFields))
+	}
+
+	// If we want to know what keys are unused, compile thta
+	if len(unusedKeysVal) > 0 {
+		unusedKeys := make([]string, 0, int(o.Len()) - len(usedKeys))
+
+		iter := o.Iterate(true)
+		defer iter.Close()
+		for elem := iter.Next(); elem != nil; elem = iter.Next() {
+			k := elem.Key()
+			if _, ok := usedKeys[k]; !ok {
+				unusedKeys = append(unusedKeys, k)
+			}
+			elem.Close()
+		}
+
+		for _, v := range unusedKeysVal {
+			v.Set(reflect.ValueOf(unusedKeys))
+		}
 	}
 
 	return nil
