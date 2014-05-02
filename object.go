@@ -71,7 +71,9 @@ func (o *Object) Get(key string) *Object {
 		return nil
 	}
 
-	return &Object{object: obj}
+	result := &Object{object: obj}
+	result.Ref()
+	return result
 }
 
 // Iterate over the objects in this object.

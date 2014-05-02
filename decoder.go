@@ -326,7 +326,7 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 
 	// If we want to know what keys are unused, compile thta
 	if len(unusedKeysVal) > 0 {
-		unusedKeys := make([]string, 0, int(o.Len()) - len(usedKeys))
+		unusedKeys := make([]string, 0, int(o.Len())-len(usedKeys))
 
 		iter := o.Iterate(true)
 		defer iter.Close()
