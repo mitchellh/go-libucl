@@ -143,9 +143,7 @@ func decodeIntoSlice(name string, o *Object, result reflect.Value) error {
 		val := reflect.Indirect(reflect.New(resultElemType))
 		fieldName := fmt.Sprintf("%s[%d]", name, i)
 		err := decode(fieldName, elem, val)
-		if expand {
-			elem.Close()
-		}
+		elem.Close()
 		if err != nil {
 			return err
 		}
@@ -306,6 +304,7 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 				}
 
 				err = decode(fieldName, obj, field)
+				obj.Close()
 				if err != nil {
 					break
 				}
