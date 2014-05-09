@@ -132,7 +132,7 @@ func (o *Object) Ref() error {
 
 // Returns the type that this object represents.
 func (o *Object) Type() ObjectType {
-	return ObjectType(o.object._type)
+	return ObjectType(C.ucl_object_type(o.object))
 }
 
 //------------------------------------------------------------------------
