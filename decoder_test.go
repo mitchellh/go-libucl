@@ -31,6 +31,43 @@ func TestObjectDecode_basic(t *testing.T) {
 	}
 }
 
+func TestObjectDecode_interface(t *testing.T) {
+	obj := testParseString(t, `
+	foo {
+		f1 = "foo";
+		f2 = [1, 2, 3];
+		f3 = ["foo", 2, 42];
+	}
+	`)
+	defer obj.Close()
+
+	obj = obj.Get("foo")
+	defer obj.Close()
+
+	var result map[string]interface{}
+	if err := obj.Decode(&result); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if len(result) != 3 {
+		t.Fatalf("bad: %#v", result)
+	}
+
+	if result["f1"].(string) != "foo" {
+		t.Fatalf("bad: %#v", result)
+	}
+
+	expected := []interface{}{1,2,3}
+	if !reflect.DeepEqual(result["f2"], expected) {
+		t.Fatalf("bad: %#v", result["f2"])
+	}
+
+	expected = []interface{}{"foo",2,42}
+	if !reflect.DeepEqual(result["f3"], expected) {
+		t.Fatalf("bad: %#v", result["f3"])
+	}
+}
+
 func TestObjectDecode_map(t *testing.T) {
 	obj := testParseString(t, "foo = bar; bar = 12;")
 	defer obj.Close()

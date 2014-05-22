@@ -16,6 +16,10 @@ func (o *Object) Decode(v interface{}) error {
 
 func decode(name string, o *Object, result reflect.Value) error {
 	switch result.Kind() {
+	case reflect.Interface:
+		// Interface is a bit weird. When we see an interface, we do
+		// our best effort to determine the type, and put it into that.
+		return decodeIntoInterface(name, o, result)
 	case reflect.Int:
 		return decodeIntoInt(name, o, result)
 	case reflect.Map:
@@ -48,6 +52,50 @@ func decodeIntoInt(name string, o *Object, result reflect.Value) error {
 		result.SetInt(o.ToInt())
 	}
 
+	return nil
+}
+
+func decodeIntoInterface(name string, o *Object, result reflect.Value) error {
+	var set reflect.Value
+	redecode := true
+
+	switch o.Type() {
+	case ObjectTypeArray:
+		redecode = false
+
+		result := make([]interface{}, 0, int(o.Len()))
+
+		iter := o.Iterate(true)
+		defer iter.Close()
+		for o := iter.Next(); o != nil; o = iter.Next() {
+			raw := new(interface{})
+			err := decode(name, o, reflect.Indirect(reflect.ValueOf(raw)))
+			o.Close()
+
+			if err != nil {
+				return err
+			}
+
+			result = append(result, *raw)
+		}
+
+		set = reflect.ValueOf(result)
+	case ObjectTypeInt:
+		var result int
+		set = reflect.Indirect(reflect.New(reflect.TypeOf(result)))
+	case ObjectTypeString:
+		set = reflect.Indirect(reflect.New(reflect.TypeOf("")))
+	default:
+		return fmt.Errorf("%s: unsupported type: %s", name, o.Type())
+	}
+
+	if redecode {
+		if err := decode(name, o, set); err != nil {
+			return err
+		}
+	}
+
+	result.Set(set)
 	return nil
 }
 
