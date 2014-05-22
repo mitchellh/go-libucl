@@ -20,6 +20,21 @@ func TestObjectEmit(t *testing.T) {
 	}
 }
 
+func TestObjectEmit_EmitConfig(t *testing.T) {
+	obj := testParseString(t, "foo = bar; bar = baz;")
+	defer obj.Close()
+
+	result, err := obj.Emit(EmitConfig)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := "foo = \"bar\";\nbar = \"baz\";\n"
+	if result != expected {
+		t.Fatalf("bad: %#v", result)
+	}
+}
+
 func TestObjectGet(t *testing.T) {
 	obj := testParseString(t, "foo = bar; bar = baz;")
 	defer obj.Close()
