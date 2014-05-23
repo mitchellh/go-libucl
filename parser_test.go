@@ -95,6 +95,28 @@ func TestParserAddFile(t *testing.T) {
 	}
 }
 
+func TestParserRegisterMacro(t *testing.T) {
+	value := ""
+	macro := func(data string) {
+		value = data
+	}
+
+	config := `.foo "bar";`
+
+	p := NewParser(0)
+	defer p.Close()
+
+	p.RegisterMacro("foo", macro)
+
+	if err := p.AddString(config); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if value != "bar" {
+		t.Fatalf("bad: %#v", value)
+	}
+}
+
 func TestParseString(t *testing.T) {
 	obj, err := ParseString("foo = bar; baz = boo;")
 	if err != nil {

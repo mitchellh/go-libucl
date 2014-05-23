@@ -2,12 +2,17 @@ package libucl
 
 import (
 	"errors"
+	"sync"
 	"unsafe"
 )
 
 // #include <ucl.h>
 // #include <stdlib.h>
+// #include "util.h"
 import "C"
+
+// MacroFunc is the callback type for macros.
+type MacroFunc func(string)
 
 // ParserFlag are flags that can be used to initialize a parser.
 //
@@ -22,8 +27,14 @@ const (
 	ParserNoTime                  = C.UCL_PARSER_NO_TIME
 )
 
+// Keeps track of all the macros internally
+var macros map[int]MacroFunc = nil
+var macrosIdx int = 0
+var macrosLock sync.Mutex
+
 // Parser is responsible for parsing libucl data.
 type Parser struct {
+	macros []int
 	parser *C.struct_ucl_parser
 }
 
@@ -76,6 +87,14 @@ func (p *Parser) AddFile(path string) error {
 // any unused memory.
 func (p *Parser) Close() {
 	C.ucl_parser_free(p.parser)
+
+	if len(p.macros) > 0 {
+		macrosLock.Lock()
+		defer macrosLock.Unlock()
+		for _, idx := range p.macros {
+			delete(macros, idx)
+		}
+	}
 }
 
 // Retrieves the root-level object for a configuration.
@@ -86,4 +105,48 @@ func (p *Parser) Object() *Object {
 	}
 
 	return &Object{object: obj}
+}
+
+// RegisterMacro registers a macro that is called from the configuration.
+func (p *Parser) RegisterMacro(name string, f MacroFunc) {
+	// Register it globally
+	macrosLock.Lock()
+	if macros == nil {
+		macros = make(map[int]MacroFunc)
+	}
+	for macros[macrosIdx] != nil {
+		macrosIdx++
+	}
+	idx := macrosIdx
+	macros[idx] = f
+	macrosIdx++
+	macrosLock.Unlock()
+
+	// Register the index with our parser so we can free it
+	p.macros = append(p.macros, idx)
+
+	cname := C.CString(name)
+	defer C.free(unsafe.Pointer(cname))
+
+	C.ucl_parser_register_macro(
+		p.parser,
+		cname,
+		C._go_macro_handler_func(),
+		C._go_macro_index(C.int(idx)))
+}
+
+//export go_macro_call
+func go_macro_call(id int, data *C.char, n C.int) C.bool {
+	macrosLock.Lock()
+	f := macros[id]
+	macrosLock.Unlock()
+
+	// Macro not found, return error
+	if f == nil {
+		return false
+	}
+
+	// Macro found, call it!
+	f(C.GoStringN(data, n))
+	return true
 }
