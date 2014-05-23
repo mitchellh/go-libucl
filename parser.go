@@ -134,9 +134,9 @@ func (p *Parser) RegisterMacro(name string, f MacroFunc) {
 }
 
 //export go_macro_call
-func go_macro_call(id int, data *C.char, n C.int) C.bool {
+func go_macro_call(id C.int, data *C.char, n C.int) C.bool {
 	macrosLock.Lock()
-	f := macros[id]
+	f := macros[int(id)]
 	macrosLock.Unlock()
 
 	// Macro not found, return error
