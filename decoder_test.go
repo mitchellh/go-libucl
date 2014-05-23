@@ -57,12 +57,12 @@ func TestObjectDecode_interface(t *testing.T) {
 		t.Fatalf("bad: %#v", result)
 	}
 
-	expected := []interface{}{1,2,3}
+	expected := []interface{}{1, 2, 3}
 	if !reflect.DeepEqual(result["f2"], expected) {
 		t.Fatalf("bad: %#v", result["f2"])
 	}
 
-	expected = []interface{}{"foo",2,42}
+	expected = []interface{}{"foo", 2, 42}
 	if !reflect.DeepEqual(result["f3"], expected) {
 		t.Fatalf("bad: %#v", result["f3"])
 	}
