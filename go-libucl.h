@@ -1,5 +1,5 @@
-#ifndef _GOLIBUCL_UTIL_H_INCLUDED
-#define _GOLIBUCL_UTIL_H_INCLUDED
+#ifndef _GOLIBUCL_H_INCLUDED
+#define _GOLIBUCL_H_INCLUDED
 
 #include <ucl.h>
 #include <stdlib.h>
@@ -18,7 +18,7 @@ extern bool go_macro_call(int, char *data, int);
 
 // Indirection that actually calls the Go macro handler.
 static inline bool _go_macro_handler(const unsigned char *data, size_t len, void* ud) {
-    return go_macro_call((int)ud, (char*)data, len);
+    return go_macro_call((int)ud, (char*)data, (int)len);
 }
 
 // Returns the ucl_macro_handler that we have, since we can't get this
@@ -33,4 +33,4 @@ static inline void *_go_macro_index(int idx) {
     return (void *)idx;
 }
 
-#endif
+#endif /* _GOLIBUCL_H_INCLUDED */
