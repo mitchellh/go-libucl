@@ -2,9 +2,7 @@ package libucl
 
 import "unsafe"
 
-// #include <ucl.h>
-// #include <stdlib.h>
-// #include "util.h"
+// #include "go-libucl.h"
 import "C"
 
 // Object represents a single object within a configuration.

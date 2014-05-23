@@ -6,9 +6,7 @@ import (
 	"unsafe"
 )
 
-// #include <ucl.h>
-// #include <stdlib.h>
-// #include "util.h"
+// #include "go-libucl.h"
 import "C"
 
 // MacroFunc is the callback type for macros.
