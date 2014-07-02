@@ -138,6 +138,27 @@ func TestObjectDecode_mapNonObject(t *testing.T) {
 	}
 }
 
+func TestObjectDecode_mapObject(t *testing.T) {
+	obj := testParseString(t, "foo = bar; bar { baz = \"what\" }")
+	defer obj.Close()
+
+	var result map[string]interface{}
+	if err := obj.Decode(&result); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := map[string]interface{}{
+		"foo": "bar",
+		"bar": map[string]interface{}{
+			"baz": "what",
+		},
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Fatalf("bad: %#v", result)
+	}
+}
+
 func TestObjectDecode_mapReuseVal(t *testing.T) {
 	type Struct struct {
 		Foo string

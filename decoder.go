@@ -83,10 +83,30 @@ func decodeIntoInterface(name string, o *Object, result reflect.Value) error {
 	case ObjectTypeInt:
 		var result int
 		set = reflect.Indirect(reflect.New(reflect.TypeOf(result)))
+	case ObjectTypeObject:
+		redecode = false
+
+		result := make(map[string]interface{})
+		iter := o.Iterate(true)
+		defer iter.Close()
+		for o := iter.Next(); o != nil; o = iter.Next() {
+			var raw interface{}
+			err := decode(name, o, reflect.Indirect(reflect.ValueOf(&raw)))
+			o.Close()
+
+			if err != nil {
+				return err
+			}
+
+			result[o.Key()] = raw
+		}
+
+		set = reflect.ValueOf(result)
 	case ObjectTypeString:
 		set = reflect.Indirect(reflect.New(reflect.TypeOf("")))
 	default:
-		return fmt.Errorf("%s: unsupported type: %s", name, o.Type())
+		return fmt.Errorf(
+			"%s: unsupported type to interface: %s", name, o.Type())
 	}
 
 	if redecode {
@@ -241,7 +261,9 @@ func decodeIntoStruct(name string, o *Object, result reflect.Value) error {
 			if fieldType.Anonymous {
 				fieldKind := fieldType.Type.Kind()
 				if fieldKind != reflect.Struct {
-					return fmt.Errorf("%s: unsupported type: %s", fieldType.Name, fieldKind)
+					return fmt.Errorf(
+						"%s: unsupported type to struct: %s",
+						fieldType.Name, fieldKind)
 				}
 
 				// We have an embedded field. We "squash" the fields down
