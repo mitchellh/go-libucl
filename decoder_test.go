@@ -149,8 +149,40 @@ func TestObjectDecode_mapObject(t *testing.T) {
 
 	expected := map[string]interface{}{
 		"foo": "bar",
-		"bar": map[string]interface{}{
-			"baz": "what",
+		"bar": []map[string]interface{}{
+			map[string]interface{}{
+				"baz": "what",
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Fatalf("bad: %#v", result)
+	}
+}
+
+func TestObjectDecode_mapObjectMultiple(t *testing.T) {
+	obj := testParseString(t, `
+	foo = bar
+	bar { baz = "what" }
+	bar { port = 3000 }
+`)
+	defer obj.Close()
+
+	var result map[string]interface{}
+	if err := obj.Decode(&result); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	expected := map[string]interface{}{
+		"foo": "bar",
+		"bar": []map[string]interface{}{
+			map[string]interface{}{
+				"baz": "what",
+			},
+			map[string]interface{}{
+				"port": 3000,
+			},
 		},
 	}
 

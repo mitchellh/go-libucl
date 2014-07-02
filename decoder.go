@@ -86,19 +86,28 @@ func decodeIntoInterface(name string, o *Object, result reflect.Value) error {
 	case ObjectTypeObject:
 		redecode = false
 
-		result := make(map[string]interface{})
-		iter := o.Iterate(true)
-		defer iter.Close()
-		for o := iter.Next(); o != nil; o = iter.Next() {
-			var raw interface{}
-			err := decode(name, o, reflect.Indirect(reflect.ValueOf(&raw)))
+		result := make([]map[string]interface{}, 0, int(o.Len()))
+
+		outer := o.Iterate(false)
+		defer outer.Close()
+		for o := outer.Next(); o != nil; o = outer.Next() {
+			m := make(map[string]interface{})
+			inner := o.Iterate(true)
+			for o2 := inner.Next(); o2 != nil; o2 = inner.Next() {
+				var raw interface{}
+				err := decode(name, o2, reflect.Indirect(reflect.ValueOf(&raw)))
+				o2.Close()
+
+				if err != nil {
+					return err
+				}
+
+				m[o2.Key()] = raw
+			}
+			inner.Close()
 			o.Close()
 
-			if err != nil {
-				return err
-			}
-
-			result[o.Key()] = raw
+			result = append(result, m)
 		}
 
 		set = reflect.ValueOf(result)
