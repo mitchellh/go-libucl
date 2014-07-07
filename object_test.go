@@ -129,3 +129,17 @@ func TestObjectIterate_array(t *testing.T) {
 		t.Fatalf("bad: %#v", result)
 	}
 }
+
+func TestObjectToBool(t *testing.T) {
+	obj := testParseString(t, "foo = true; bar = false;")
+	defer obj.Close()
+
+	v := obj.Get("bar")
+	defer v.Close()
+	if v == nil {
+		t.Fatal("should find")
+	}
+	if v.ToBool() {
+		t.Fatalf("bad: %#v", v.ToBool())
+	}
+}

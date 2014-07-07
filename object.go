@@ -137,6 +137,10 @@ func (o *Object) Type() ObjectType {
 // Conversion Functions
 //------------------------------------------------------------------------
 
+func (o *Object) ToBool() bool {
+	return bool(C.ucl_object_toboolean(o.object))
+}
+
 func (o *Object) ToInt() int64 {
 	return int64(C.ucl_object_toint(o.object))
 }

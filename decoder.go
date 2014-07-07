@@ -16,6 +16,8 @@ func (o *Object) Decode(v interface{}) error {
 
 func decode(name string, o *Object, result reflect.Value) error {
 	switch result.Kind() {
+	case reflect.Bool:
+		return decodeIntoBool(name, o, result)
 	case reflect.Interface:
 		// Interface is a bit weird. When we see an interface, we do
 		// our best effort to determine the type, and put it into that.
@@ -34,6 +36,22 @@ func decode(name string, o *Object, result reflect.Value) error {
 		return decodeIntoStruct(name, o, result)
 	default:
 		return fmt.Errorf("%s: unsupported type: %s", name, result.Kind())
+	}
+
+	return nil
+}
+
+func decodeIntoBool(name string, o *Object, result reflect.Value) error {
+	switch o.Type() {
+	case ObjectTypeString:
+		b, err := strconv.ParseBool(o.ToString())
+		if err == nil {
+			result.SetBool(b)
+		} else {
+			return fmt.Errorf("cannot parse '%s' as bool: %s", name, err)
+		}
+	default:
+		result.SetBool(o.ToBool())
 	}
 
 	return nil

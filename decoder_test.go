@@ -7,12 +7,13 @@ import (
 
 func TestObjectDecode_basic(t *testing.T) {
 	type Basic struct {
+		Bool   bool
 		Str    string
 		Num    int
 		NumStr int
 	}
 
-	obj := testParseString(t, `str = bar; num = 7; numstr = "42";`)
+	obj := testParseString(t, `bool = true; str = bar; num = 7; numstr = "42";`)
 	defer obj.Close()
 
 	var result Basic
@@ -21,6 +22,7 @@ func TestObjectDecode_basic(t *testing.T) {
 	}
 
 	expected := Basic{
+		Bool:   true,
 		Str:    "bar",
 		Num:    7,
 		NumStr: 42,
