@@ -260,6 +260,8 @@ func decodeIntoSlice(name string, o *Object, result reflect.Value) error {
 func decodeIntoString(name string, o *Object, result reflect.Value) error {
 	objType := o.Type()
 	switch objType {
+	case ObjectTypeBoolean:
+		result.SetString(strconv.FormatBool(o.ToBool()))
 	case ObjectTypeString:
 		result.SetString(o.ToString())
 	case ObjectTypeInt:
