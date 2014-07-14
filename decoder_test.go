@@ -44,6 +44,7 @@ func TestObjectDecode_interface(t *testing.T) {
 		f1 = "foo";
 		f2 = [1, 2, 3];
 		f3 = ["foo", 2, 42];
+		f4 = true;
 	}
 	`)
 	defer obj.Close()
@@ -56,7 +57,7 @@ func TestObjectDecode_interface(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	if len(result) != 3 {
+	if len(result) != 4 {
 		t.Fatalf("bad: %#v", result)
 	}
 
@@ -72,6 +73,10 @@ func TestObjectDecode_interface(t *testing.T) {
 	expected = []interface{}{"foo", 2, 42}
 	if !reflect.DeepEqual(result["f3"], expected) {
 		t.Fatalf("bad: %#v", result["f3"])
+	}
+
+	if result["f4"].(bool) != true {
+		t.Fatalf("bad: %#v", result)
 	}
 }
 

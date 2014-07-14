@@ -98,6 +98,8 @@ func decodeIntoInterface(name string, o *Object, result reflect.Value) error {
 		}
 
 		set = reflect.ValueOf(result)
+	case ObjectTypeBoolean:
+		set = reflect.Indirect(reflect.New(reflect.TypeOf(o.ToBool())))
 	case ObjectTypeInt:
 		var result int
 		set = reflect.Indirect(reflect.New(reflect.TypeOf(result)))
