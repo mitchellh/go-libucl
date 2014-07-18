@@ -53,6 +53,13 @@ func TestObjectDelete(t *testing.T) {
 	}
 }
 
+func TestObjectDelete_unknown(t *testing.T) {
+	obj := testParseString(t, "bar = baz;")
+	defer obj.Close()
+
+	obj.Delete("foo")
+}
+
 func TestObjectGet(t *testing.T) {
 	obj := testParseString(t, "foo = bar; bar = baz;")
 	defer obj.Close()
