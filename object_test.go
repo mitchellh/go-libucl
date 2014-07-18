@@ -35,6 +35,24 @@ func TestObjectEmit_EmitConfig(t *testing.T) {
 	}
 }
 
+func TestObjectDelete(t *testing.T) {
+	obj := testParseString(t, "bar = baz;")
+	defer obj.Close()
+
+	v := obj.Get("bar")
+	if v == nil {
+		t.Fatal("should find")
+	}
+	v.Close()
+
+	obj.Delete("bar")
+	v = obj.Get("bar")
+	if v != nil {
+		v.Close()
+		t.Fatalf("should not find")
+	}
+}
+
 func TestObjectGet(t *testing.T) {
 	obj := testParseString(t, "foo = bar; bar = baz;")
 	defer obj.Close()

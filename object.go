@@ -60,6 +60,15 @@ func (o *Object) Emit(t Emitter) (string, error) {
 	return C.GoString(C._go_uchar_to_char(result)), nil
 }
 
+// Delete removes the given key from the object. The key will automatically
+// be dereferenced once when this is called.
+func (o *Object) Delete(key string) {
+	ckey := C.CString(key)
+	defer C.free(unsafe.Pointer(ckey))
+
+	C.ucl_object_delete_key(o.object, ckey)
+}
+
 func (o *Object) Get(key string) *Object {
 	ckey := C.CString(key)
 	defer C.free(unsafe.Pointer(ckey))
