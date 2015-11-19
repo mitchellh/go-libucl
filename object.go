@@ -154,6 +154,10 @@ func (o *Object) ToInt() int64 {
 	return int64(C.ucl_object_toint(o.object))
 }
 
+func (o *Object) ToFloat() float64 {
+	return float64(C.ucl_object_todouble(o.object))
+}
+
 func (o *Object) ToString() string {
 	return C.GoString(C.ucl_object_tostring(o.object))
 }

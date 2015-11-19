@@ -168,3 +168,69 @@ func TestObjectToBool(t *testing.T) {
 		t.Fatalf("bad: %#v", v.ToBool())
 	}
 }
+
+func TestObjectToFloat_oneThousand(t *testing.T) {
+	obj := testParseString(t, "foo = 1000; ")
+	defer obj.Close()
+
+	v := obj.Get("foo")
+	defer v.Close()
+	if v == nil {
+		t.Fatal("should find")
+	}
+	if v.ToFloat() != 1000 {
+		t.Fatalf("bad: %#v", v.ToFloat())
+	}
+}
+
+func TestObjectToFloat_oneThousandth(t *testing.T) {
+	obj := testParseString(t, "foo = 0.001; ")
+	defer obj.Close()
+
+	v := obj.Get("foo")
+	defer v.Close()
+	if v == nil {
+		t.Fatal("should find")
+	}
+	if v.ToFloat() != 0.001 {
+		t.Fatalf("bad: %#v", v.ToFloat())
+	}
+}
+
+func TestObjectToFloat_oneThird(t *testing.T) {
+	/* from a c progam that prints 1/3:
+	 * 0.3333333333333333148296162562473909929394721984863281
+	 */
+	obj := testParseString(t, "foo = 0.3333333333333333148296162562473909929394721984863281; ")
+	defer obj.Close()
+
+	var g float64 = 1.0 / 3.0
+
+	v := obj.Get("foo")
+	defer v.Close()
+	if v == nil {
+		t.Fatal("should find")
+	}
+	if v.ToFloat() != g {
+		t.Fatalf("bad: %#v, expected: %v", v.ToFloat(), g)
+	}
+}
+
+func TestObjectToFloat_negativeOneThird(t *testing.T) {
+	/* from a c progam that prints 1/3:
+	 * -0.3333333333333333148296162562473909929394721984863281
+	 */
+	obj := testParseString(t, "foo = -0.3333333333333333148296162562473909929394721984863281; ")
+	defer obj.Close()
+
+	var g float64 = -1.0 / 3.0
+
+	v := obj.Get("foo")
+	defer v.Close()
+	if v == nil {
+		t.Fatal("should find")
+	}
+	if v.ToFloat() != g {
+		t.Fatalf("bad: %#v, expected: %v", v.ToFloat(), g)
+	}
+}
